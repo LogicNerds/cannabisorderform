@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wholesale Order Form</title>
     
+    <!-- Prevent browser caching to ensure fresh data -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
     <!-- jsPDF Library for PDF Generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
@@ -317,6 +322,7 @@
             display: flex;
             gap: 15px;
             flex-wrap: wrap;
+            align-items: center;
         }
         
         .btn {
@@ -340,11 +346,29 @@
             box-shadow: 0 4px 12px rgba(44, 95, 45, 0.3);
         }
         
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+        
+        .btn-secondary:hover {
+            background: #e8e8e8;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
         .btn-primary:disabled {
             background: #ccc;
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
+        }
+        
+        .last-updated {
+            font-size: 13px;
+            color: #777;
+            font-style: italic;
         }
         
         .error-message {
@@ -882,6 +906,9 @@
          * Build totals and action buttons section
          */
         function buildTotalsAndActions() {
+            const now = new Date();
+            const timestamp = now.toLocaleString();
+            
             return `
                 <div class="totals-section">
                     <div class="grand-total">
@@ -894,6 +921,10 @@
                     <button class="btn btn-primary" onclick="generatePdf()">
                         Generate PO PDF
                     </button>
+                    <button class="btn btn-secondary" onclick="refreshMenu()">
+                        🔄 Refresh Menu
+                    </button>
+                    <span class="last-updated">Last updated: ${timestamp}</span>
                 </div>
                 
                 <div class="error-message" id="errorMessage"></div>
@@ -1084,6 +1115,14 @@
         // ============================================
         // CATEGORY COLLAPSE/EXPAND
         // ============================================
+        
+        /**
+         * Refresh the menu data from Google Sheets
+         */
+        function refreshMenu() {
+            // Force a hard reload to fetch fresh data
+            location.reload(true);
+        }
         
         /**
          * Toggle category collapse state
