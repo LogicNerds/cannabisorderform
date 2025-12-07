@@ -480,12 +480,8 @@
          * @returns {Promise<string>} The CSV text
          */
         async function fetchCsv(url) {
-            // Add cache-busting parameter to force fresh data from Google Sheets
-            const cacheBuster = `&_=${Date.now()}`;
-            const urlWithCacheBuster = url + cacheBuster;
-            
             // Use CORS proxy to bypass CORS restrictions when opening file directly
-            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(urlWithCacheBuster)}`;
+            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
             const response = await fetch(proxyUrl);
             if (!response.ok) {
                 throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
