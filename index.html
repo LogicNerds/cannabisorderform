@@ -499,18 +499,43 @@
         // ============================================
         
         /**
-         * Fetch CSV data from a URL
+         * Fetch CSV data from a URL with fallback CORS proxies
          * @param {string} url - The URL to fetch
          * @returns {Promise<string>} The CSV text
          */
         async function fetchCsv(url) {
-            // Use CORS proxy to bypass CORS restrictions when opening file directly
-            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-            const response = await fetch(proxyUrl);
-            if (!response.ok) {
-                throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
+            // List of CORS proxies to try in order
+            const corsProxies = [
+                (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+                (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+                (url) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+            ];
+            
+            // Try each proxy in sequence
+            for (let i = 0; i < corsProxies.length; i++) {
+                try {
+                    const proxyUrl = corsProxies[i](url);
+                    console.log(`Attempting to fetch via proxy ${i + 1}/${corsProxies.length}...`);
+                    
+                    const response = await fetch(proxyUrl);
+                    
+                    if (response.ok) {
+                        console.log(`Success with proxy ${i + 1}`);
+                        return await response.text();
+                    }
+                    
+                    console.log(`Proxy ${i + 1} returned status ${response.status}, trying next...`);
+                } catch (error) {
+                    console.log(`Proxy ${i + 1} failed: ${error.message}, trying next...`);
+                    
+                    // If this was the last proxy, throw the error
+                    if (i === corsProxies.length - 1) {
+                        throw new Error(`All CORS proxies failed. Last error: ${error.message}`);
+                    }
+                }
             }
-            return await response.text();
+            
+            throw new Error('Failed to fetch data from all available proxies');
         }
         
         /**
